@@ -5,11 +5,13 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
 	"github.com/go-playground/validator/v10"
 
+	"url-shortener/internal/http-server/metrics"
 	resp "url-shortener/internal/lib/api/response"
 	"url-shortener/internal/lib/logger/sl"
 	"url-shortener/internal/lib/random"
@@ -36,6 +38,11 @@ type URLSaver interface {
 
 func New(log *slog.Logger, urlSaver URLSaver) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		//metrics
+		start := time.Now()
+		metrics.ThroughputCounter.Inc()
+		//
+
 		const op = "handlers.url.save.New"
 
 		log := log.With(
@@ -52,7 +59,6 @@ func New(log *slog.Logger, urlSaver URLSaver) http.HandlerFunc {
 			log.Error("request body is empty")
 
 			render.JSON(w, r, resp.Error("empty request"))
-
 			return
 		}
 		if err != nil {
@@ -97,7 +103,8 @@ func New(log *slog.Logger, urlSaver URLSaver) http.HandlerFunc {
 		}
 
 		log.Info("url added", slog.Int64("id", id))
-
+		duration := time.Since(start).Seconds()
+		metrics.ResponseTimeHistogram.Observe(duration)
 		responseOK(w, r, alias)
 	}
 }
