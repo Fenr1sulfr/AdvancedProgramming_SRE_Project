@@ -11,6 +11,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	// "golang.org/x/exp/slog"
 
@@ -18,6 +19,7 @@ import (
 	"url-shortener/internal/config"
 	"url-shortener/internal/http-server/handlers/redirect"
 	"url-shortener/internal/http-server/handlers/url/save"
+	"url-shortener/internal/http-server/metrics"
 	mwLogger "url-shortener/internal/http-server/middleware/logger"
 	"url-shortener/internal/lib/logger/handlers/slogpretty"
 	"url-shortener/internal/lib/logger/sl"
@@ -31,9 +33,15 @@ const (
 )
 
 func main() {
+	metrics.StartUptimeTracker()
 	cfg := config.MustLoad()
 
-	log := setupLogger(cfg.Env)
+	logFile, err := os.OpenFile("./logs/app.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		panic("can't open log file")
+	}
+	defer logFile.Close()
+	log := setupLogger(cfg.Env, *logFile)
 
 	log.Info(
 		"starting url-shortener",
@@ -41,8 +49,8 @@ func main() {
 		slog.String("version", "123"),
 	)
 	log.Debug("debug messages are enabled")
-
 	//grpc interact
+
 	authClient, err := grpc.New(context.Background(), "localhost:8083", cfg.Timeout, log, 3)
 	authClient.IsAdmin(context.Background(), 1)
 	//
@@ -60,10 +68,10 @@ func main() {
 	router.Use(middleware.URLFormat)
 
 	router.Route("/url", func(r chi.Router) {
-		r.Use(middleware.BasicAuth("url-shortener", map[string]string{
-			cfg.HTTPServer.User: cfg.HTTPServer.Password,
-		}))
-
+		// r.Use(middleware.BasicAuth("url-shortener", map[string]string{
+		// 	cfg.HTTPServer.User: cfg.HTTPServer.Password,
+		// }))
+		r.Get("/metrics", promhttp.Handler().ServeHTTP)
 		r.Post("/", save.New(log, storage))
 		// TODO: add DELETE /url/{id}
 	})
@@ -109,7 +117,7 @@ func main() {
 	log.Info("server stopped")
 }
 
-func setupLogger(env string) *slog.Logger {
+func setupLogger(env string, file os.File) *slog.Logger {
 	var log *slog.Logger
 
 	switch env {
@@ -117,25 +125,26 @@ func setupLogger(env string) *slog.Logger {
 		log = setupPrettySlog()
 	case envDev:
 		log = slog.New(
-			slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}),
+			slog.NewJSONHandler(&file, &slog.HandlerOptions{Level: slog.LevelDebug}),
 		)
 	case envProd:
 		log = slog.New(
-			slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}),
+			slog.NewJSONHandler(&file, &slog.HandlerOptions{Level: slog.LevelInfo}),
 		)
 	default: // If env config is invalid, set prod settings by default due to security
 		log = slog.New(
-			slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}),
+			slog.NewJSONHandler(&file, &slog.HandlerOptions{Level: slog.LevelInfo}),
 		)
-	}
 
+	}
+	slog.SetDefault(log)
 	return log
 }
 
 func setupPrettySlog() *slog.Logger {
 	opts := slogpretty.PrettyHandlerOptions{
 		SlogOpts: &slog.HandlerOptions{
-			Level: slog.LevelDebug,
+			Level: slog.LevelError,
 		},
 	}
 
