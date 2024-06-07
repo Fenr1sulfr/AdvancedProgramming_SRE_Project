@@ -4,6 +4,7 @@ import (
 	"errors"
 	"log/slog"
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -11,6 +12,7 @@ import (
 
 	// "golang.org/x/exp/slog"
 
+	"url-shortener/internal/http-server/metrics"
 	resp "url-shortener/internal/lib/api/response"
 	"url-shortener/internal/lib/logger/sl"
 	"url-shortener/internal/storage"
@@ -25,6 +27,10 @@ type URLGetter interface {
 
 func New(log *slog.Logger, urlGetter URLGetter) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		//metrics
+		start := time.Now()
+		metrics.ThroughputCounter.Inc()
+		//
 		const op = "handlers.url.redirect.New"
 
 		log := log.With(
@@ -58,7 +64,8 @@ func New(log *slog.Logger, urlGetter URLGetter) http.HandlerFunc {
 		}
 
 		log.Info("got url", slog.String("url", resURL))
-
+		duration := time.Since(start).Seconds()
+		metrics.ResponseTimeHistogram.Observe(duration)
 		// redirect to found url
 		http.Redirect(w, r, resURL, http.StatusFound)
 	}
