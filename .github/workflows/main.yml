@@ -31,7 +31,7 @@ jobs:
   deploy: 
     runs-on: ubuntu-latest
     env:
-      HOST: ubuntu@${{ secret.PUBLIC_DNS }}
+      HOST: ubuntu@${{ secrets.PUBLIC_DNS }}
       DEPLOY_DIRECTORY: /home/ubuntu/url-shortener
       CONFIG_PATH: /home/ubuntu/url-shortener/config/prod.yaml
       ENV_FILE_PATH: /home/ubuntu/url-shortener/config.env
