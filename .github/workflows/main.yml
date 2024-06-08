@@ -56,7 +56,7 @@ jobs:
       working-directory: ./terraform
     
     - name: Copy IP address to Ansible inventory
-        run: echo "[web_servers]\n${{ steps.get_ip.outputs.ip_address }}" > ansible/inventory
+      run: echo "[web_servers]\n${{ steps.get_ip.outputs.ip_address }}" > ansible/inventory
 
   deploy: 
     needs: terraform
