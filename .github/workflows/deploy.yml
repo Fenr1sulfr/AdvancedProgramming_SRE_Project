@@ -17,10 +17,14 @@ jobs:
       ENV_FILE_PATH: /root/apps/url-shortener/config.env
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-        with:
-          ref: ${{ github.event.inputs.tag }}
+   - name: Checkout repository
+     uses: actions/checkout@v2
+     with:
+    ref: ${{ github.event.inputs.tag }}
+    fetch-depth: 0  # Fetch all history
+    persist-credentials: false  # Disable credential caching
+    clean: false  # Do not clean the repository
+
       - name: Check if tag exists
         run: |
           git fetch --all --tags
@@ -34,6 +38,7 @@ jobs:
           go-version: 1.21.1
       - name: Build app
         run: |
+          set -x
           go mod download
           go build -o url-shortener ./cmd/url-shortener
       - name: Deploy to VM
