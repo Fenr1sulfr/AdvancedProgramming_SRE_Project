@@ -21,9 +21,12 @@ jobs:
       with:
         go-version: '1.21.1'
 
-    - name: Build
-      run: go build -v ./cmd/url-shortener
-
+    # - name: Build
+    #   run: go build -v ./cmd/url-shortener
+    - name: Install dependencies
+      run: go get .
+    - name: Run site
+      run: go run ./cmd/url-shortener
     - name: Test General
       run: go test -v ./tests
     - name : Test redirect
