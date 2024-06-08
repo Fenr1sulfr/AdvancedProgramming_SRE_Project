@@ -23,8 +23,8 @@ jobs:
 
     # - name: Build
     #   run: go build -v ./cmd/url-shortener
-    - name: Install dependencies
-      run: go get .
+    # - name: Install dependencies
+    #   run: go get .
     - name: Run site
       run: go run ./cmd/url-shortener
     - name: Test General
