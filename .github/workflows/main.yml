@@ -28,42 +28,10 @@ jobs:
     - name: Run tests
       run: go test -v ./...
 
-  terraform:
-    needs: build-test
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-
-    - name: Set up Terraform
-      uses: hashicorp/setup-terraform@v1
-
-    - name: Initialize Terraform
-      working-directory: ./terraform 
-      run: terraform init
-
-    - name: Apply Terraform
-      working-directory: ./terraform 
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      run: terraform apply -auto-approve
-    
-    - name: Get IP Address
-      id: get_ip
-      run: echo "::set-output name=ip_address::$(terraform output -raw instance_ip)"
-      working-directory: ./terraform
-    
-    - name: Copy IP address to Ansible inventory
-        run: echo "[web_servers]\n${{ steps.get_ip.outputs.ip_address }}" > ansible/inventory
-
   deploy: 
-    needs: terraform
     runs-on: ubuntu-latest
     env:
-      IP_ADDRESS: ${{ steps.get_ip.outputs.ip_address }}
-      HOST: ubuntu@${{ env.IP_ADDRESS }}
+      HOST: ubuntu@${{ secret.PUBLIC_DNS }}
       DEPLOY_DIRECTORY: /home/ubuntu/url-shortener
       CONFIG_PATH: /home/ubuntu/url-shortener/config/prod.yaml
       ENV_FILE_PATH: /home/ubuntu/url-shortener/config.env
