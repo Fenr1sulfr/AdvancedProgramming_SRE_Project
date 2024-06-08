@@ -1,0 +1,15 @@
+global:
+  scrape_interval: 10s 
+  # evaluation_interval: 10s 
+
+# rule_files:
+#   - "rules.yml"
+
+scrape_configs:
+  - job_name: 'url-shortener'
+    scrape_interval: 5s
+    tls_config:
+      insecure_skip_verify: true
+    metrics_path: 'url/metrics'
+    static_configs:
+      - targets: ['localhost:8082']
