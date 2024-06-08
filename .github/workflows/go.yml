@@ -28,5 +28,5 @@ jobs:
       run: go test -v ./tests
     - name : Test redirect
       run: go test -v ./internal/http-server/handlers/redirect
-    - name : Test redirect
+    - name : Test save
       run: go test -v ./internal/http-server/handlers/save
