@@ -21,7 +21,7 @@ jobs:
       with:
         go-version: '1.21.1'
     - name: Install dependencies
-      run: go get .
+      run: go get -u -v -f all
     - name: Build
       run: go build -v ./cmd/url-shortener
 
