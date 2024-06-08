@@ -1,4 +1,5 @@
 
 # Terraform dependencies and private key
 terraform/keypair.pem
+terraform/terraform.tfstate
 .terraform*
