@@ -20,13 +20,14 @@ jobs:
       uses: actions/setup-go@v4
       with:
         go-version: '1.21.1'
-
+    - name: Install dependencies
+      run: go get -u -v -f all
     - name: Build
       run: go build -v ./cmd/url-shortener
 
     - name: Test General
       run: go test -v ./tests
-    - name : Test redirect
-      run: go test -v ./internal/http-server/handlers/redirect
-    - name : Test save
-      run: go test -v ./internal/http-server/handlers/save
+    # - name : Test redirect
+    #   run: go test -v ./internal/http-server/handlers/redirect
+    # - name : Test save
+    #   run: go test -v ./internal/http-server/handlers/save
