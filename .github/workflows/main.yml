@@ -54,14 +54,14 @@ jobs:
       working-directory: ./terraform
     
     - name: Copy IP address to Ansible inventory
-        run: echo "[web_servers]\n${{ env.IP_ADDRESS }}" > ansible/inventory
+        run: echo "[web_servers]\n${{ steps.get_ip.outputs.ip_address }}" > ansible/inventory
 
   deploy: 
     needs: terraform
     runs-on: ubuntu-latest
     env:
-      IP: ${{ steps.get_ip.outputs.ip_address }}
-      HOST: ubuntu@${{ env.IP }}
+      IP_ADDRESS: ${{ steps.get_ip.outputs.ip_address }}
+      HOST: ubuntu@${{ env.IP_ADDRESS }}
       DEPLOY_DIRECTORY: /home/ubuntu/url-shortener
       CONFIG_PATH: /home/ubuntu/url-shortener/config/prod.yaml
       ENV_FILE_PATH: /home/ubuntu/url-shortener/config.env
