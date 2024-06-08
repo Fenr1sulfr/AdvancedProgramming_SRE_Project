@@ -33,7 +33,7 @@ jobs:
       - name: Deploy to VM
         run: |
           sudo apt-get install -y ssh rsync
-          echo "${{ secrets.AWS_PRIVATE_KEY }}" | base64 --decode
+          echo ${{ secrets.AWS_PRIVATE_KEY }} --decode
           chmod 400 keypair.pem
           ssh -i keypair.pem -o StrictHostKeyChecking=no ${{ env.HOST }} "mkdir -p ${{ env.DEPLOY_DIRECTORY }}"
           rsync -avz -e 'ssh -i keypair.pem -o StrictHostKeyChecking=no' --exclude='.git' ./ ${{ env.HOST }}:${{ env.DEPLOY_DIRECTORY }}
