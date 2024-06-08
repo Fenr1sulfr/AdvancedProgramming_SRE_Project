@@ -19,6 +19,9 @@ jobs:
       ENV_FILE_PATH: /home/ubuntu/url-shortener/config.env
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
