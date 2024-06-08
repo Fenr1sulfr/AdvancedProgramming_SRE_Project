@@ -37,11 +37,6 @@ jobs:
       ENV_FILE_PATH: /home/ubuntu/url-shortener/config.env
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-        with:
-          ref: ${{ github.event.inputs.tag }}
-
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
