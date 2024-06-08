@@ -74,7 +74,7 @@ func main() {
 		r.Get("/metrics", promhttp.Handler().ServeHTTP)
 		r.Post("/", save.New(log, storage))
 		// TODO: add DELETE /url/{id}
-	})
+	})	
 
 	router.Get("/{alias}", redirect.New(log, storage))
 
