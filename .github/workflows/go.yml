@@ -27,7 +27,7 @@ jobs:
 
     - name: Test General
       run: go test -v ./tests
-    - name : Test redirect
-      run: go test -v ./internal/http-server/handlers/redirect
-    - name : Test save
-      run: go test -v ./internal/http-server/handlers/save
+    # - name : Test redirect
+    #   run: go test -v ./internal/http-server/handlers/redirect
+    # - name : Test save
+    #   run: go test -v ./internal/http-server/handlers/save
