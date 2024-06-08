@@ -1,0 +1,26 @@
+- name: Configure Prometheus and Grafana
+  hosts: all
+  become: true
+
+  tasks:
+  - name: Install Prometheus
+    apt:
+      name: prometheus
+      state: present
+
+  - name: Install Grafana
+    apt:
+      name: grafana
+      state: present
+
+  - name: Start Prometheus service
+    systemd:
+      name: prometheus
+      state: started
+      enabled: yes
+
+  - name: Start Grafana service
+    systemd:
+      name: grafana-server
+      state: started
+      enabled: yes
