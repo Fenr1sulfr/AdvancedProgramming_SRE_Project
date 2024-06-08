@@ -26,10 +26,7 @@ jobs:
 
       - name: Build app
         run: |
-          go get -u -v all
-          go mod download
           go build -o url-shortener ./cmd/url-shortener
-
       - name: Deploy to VM
         run: |
           sudo apt-get install -y ssh rsync
