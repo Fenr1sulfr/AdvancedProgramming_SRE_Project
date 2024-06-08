@@ -33,16 +33,16 @@ jobs:
       - name: Deploy to VM
         run: |
           sudo apt-get install -y ssh rsync
-          echo "${{ secrets.AWS_PRIVATE_KEY }}" > deploy_key.pem
-          chmod 600 deploy_key.pem
-          ssh -i deploy_key.pem -o StrictHostKeyChecking=no ${{ env.HOST }} "mkdir -p ${{ env.DEPLOY_DIRECTORY }}"
-          rsync -avz -e 'ssh -i deploy_key.pem -o StrictHostKeyChecking=no' --exclude='.git' ./ ${{ env.HOST }}:${{ env.DEPLOY_DIRECTORY }}
+          echo "${{ secrets.AWS_PRIVATE_KEY }}" > keypair.pem
+          chmod 400 keypair.pem
+          ssh -i keypair.pem -o StrictHostKeyChecking=no ${{ env.HOST }} "mkdir -p ${{ env.DEPLOY_DIRECTORY }}"
+          rsync -avz -e 'ssh -i keypair.pem -o StrictHostKeyChecking=no' --exclude='.git' ./ ${{ env.HOST }}:${{ env.DEPLOY_DIRECTORY }}
         env:
           DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
 
       - name: Remove old systemd service file
         run: |
-          ssh -i deploy_key.pem -o StrictHostKeyChecking=no ${{ env.HOST }} "rm -f /etc/systemd/system/url-shortener.service"
+          ssh -i keypair.pem -o StrictHostKeyChecking=no ${{ env.HOST }} "rm -f /etc/systemd/system/url-shortener.service"
 
       - name: List workspace contents
         run: |
@@ -51,7 +51,7 @@ jobs:
 
       - name: Create environment file on server
         run: |
-          ssh -i deploy_key.pem -o StrictHostKeyChecking=no ${{ env.HOST }} "\
+          ssh -i keypair.pem -o StrictHostKeyChecking=no ${{ env.HOST }} "\
           touch ${{ env.ENV_FILE_PATH }} && \
           chmod 600 ${{ env.ENV_FILE_PATH }} && \
           echo 'CONFIG_PATH=${{ env.CONFIG_PATH }}' > ${{ env.ENV_FILE_PATH }} && \
@@ -59,9 +59,9 @@ jobs:
 
       - name: Copy systemd service file
         run: |
-          scp -i deploy_key.pem -o StrictHostKeyChecking=no ${{ github.workspace }}/deployment/url-shortener.service ${{ env.HOST }}:/tmp/url-shortener.service
-          ssh -i deploy_key.pem -o StrictHostKeyChecking=no ${{ env.HOST }} "mv /tmp/url-shortener.service /etc/systemd/system/url-shortener.service"
+          scp -i keypair.pem -o StrictHostKeyChecking=no ${{ github.workspace }}/deployment/url-shortener.service ${{ env.HOST }}:/tmp/url-shortener.service
+          ssh -i keypair.pem -o StrictHostKeyChecking=no ${{ env.HOST }} "mv /tmp/url-shortener.service /etc/systemd/system/url-shortener.service"
 
       - name: Start application
         run: |
-          ssh -i deploy_key.pem -o StrictHostKeyChecking=no ${{ env.HOST }} "systemctl daemon-reload && systemctl restart url-shortener.service"
+          ssh -i keypair.pem -o StrictHostKeyChecking=no ${{ env.HOST }} "systemctl daemon-reload && systemctl restart url-shortener.service"
