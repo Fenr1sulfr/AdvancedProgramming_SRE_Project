@@ -7,7 +7,7 @@ on:
     inputs:
       tag:
         description: 'Tag to deploy'
-        required: true
+        required: false
 
 jobs:
   deploy: 
