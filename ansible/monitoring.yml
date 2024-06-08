@@ -4,6 +4,7 @@
   become: true
 
   tasks:
+  
   - name: Install Prometheus
     apt:
       name: prometheus
